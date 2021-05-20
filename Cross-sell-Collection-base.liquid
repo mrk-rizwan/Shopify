@@ -1,0 +1,182 @@
+{% comment %} create a cross-sell.liquid snippet {% endcomment %}
+<div class="hover_bkgr_fricc">
+    <span class="helper"></span>
+    <div class="mrk-popup-content-left">
+        <div class="popupCloseButton">&times;</div>
+      {%- assign my_upshell = product_name[1] | strip -%}  
+      <ul>
+        <h4 class="mrk-collection-name">To Make <strong>"{{ collection.title }}"</strong>, You need to add the following items. </h4>
+        {% assign current_product = product.title %}
+      {% for product in collection.products %}
+        {% unless current_product == product.title  %}
+          <li class="list-view-item">
+            {% include 'upsell-items', product: product %}
+          </li>
+        {% endunless %}
+      {% endfor %}
+      </ul>
+      </div>
+  </div>
+  
+  
+  
+  
+  
+  {% comment %} create a upsell-items.liquid file {% endcomment %}
+  {% comment %}
+    Renders a product card using "List" style
+
+    Accepts:
+    - product: {Object} Product Liquid object (required)
+    - show_vendor: {Boolean} Show the product's vendor depending on the section setting (optional)
+
+    Usage:
+    {% include 'product-card-list', product: product, show_vendor: section.settings.show_vendor %}
+{% endcomment %}
+<div class="product-card product-card--list">
+    <div class="list-view-item__link">
+      <div class="list-view-item__image-column">
+        <div class="list-view-item__image-wrapper product-card__image-wrapper">
+        {% unless product.featured_media == null %}
+          <img class="list-view-item__image" src="{{ product.featured_media | img_url: '95x95', scale: 2 }}" alt="{{ product.featured_media.alt }}">
+        {% endunless %}
+        </div>
+      </div>
+  
+      <div class="list-view-item__title-column">
+        <div class="list-view-item__title" aria-hidden="true">
+          <span class="product-card__title">{{ product.title }}</span>
+        </div>
+        {% assign my_item = product.title %}
+        <form class="img-btn " class="price" method="post" action="/cart/add" data-productid="{{ product.id }}">
+          
+          <input name="id" data-productid="{{ product.id }}" value="{{ product.variants.first.id }}" type="hidden" />
+          {% assign my_item_in_cart = 'false' %}
+          {% for item in cart.items %}
+        	{% assign cart_item = item.product.title %}
+          {% if my_item == cart_item %}
+          {% assign my_item_in_cart = 'true' %}
+          
+          {% endif %}
+          {% endfor %}
+          {% if my_item_in_cart == 'false' %}
+          <input type="number" id="Quantity-{{ product.id }}"
+                    name="quantity" value="1" min="1" pattern="[0-9]*"
+                    class="product-form__input product-form__input--quantity mrk-qty-box" data-quantity-input
+                  >
+          <input
+                     class="btn prod_button_sm" id = "{{ product.variants.first.id }}" name="add" value="ADD TO CART - {{ product.price | money }}" type="button" />
+        	{% else %}  
+          <p>Already In Cart</p>
+          {% endif %}
+        </form>
+      </div>
+  
+      <div class="list-view-item__price-column d-none-sm">
+        {% include 'product-price-listing', product: product, show_vendor: false %}
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  
+  
+  
+ <!-- Popup Css -->
+ /* Upsell popup */
+.hover_bkgr_fricc{
+  background:rgba(0,0,0,.4);
+  cursor:pointer;
+  display:none;
+  height:100%;
+  position:fixed;
+  text-align:center;
+  top:0;
+  width:100%;
+  z-index:10000;
+  padding-top: 50px;
+}
+.mrk-popup-content-left{
+  text-align: left;
+}
+.hover_bkgr_fricc .helper{
+  display:inline-block;
+  height:100%;
+  vertical-align:middle;
+}
+.hover_bkgr_fricc > div {
+  background-color: #fff;
+  box-shadow: 10px 10px 60px #555;
+  display: -webkit-inline-box;
+  height: auto;
+  max-width: 700px;
+  min-height: 100px;
+  vertical-align: top;
+  width: 100%;
+  position: relative;
+  border-radius: 8px;
+  padding: 15px 5%;
+}
+.popupCloseButton {
+  background-color: #fff;
+  border: 3px solid #999;
+  border-radius: 50px;
+  cursor: pointer;
+  display: inline-block;
+  font-family: arial;
+  font-weight: bold;
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  font-size: 25px;
+  line-height: 30px;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+}
+.popupCloseButton:hover {
+  background-color: #ccc;
+}
+/* Popup box End */
+h5.mrk-added-to-cart {
+    margin: 10px 0 0 0;
+  	-webkit-animation:mrk-fadein 4s;
+}
+@-webkit-keyframes mrk-fadein {
+from {
+opacity:0;
+}
+to {
+opacity:1;
+}
+}
+.mrk-qty-box
+{
+    padding: 10px;
+    margin: 10px 0;
+}
+.mrk-collection-name{
+	text-align: center;
+}
+@media (max-width: 667px){
+  .hover_bkgr_fricc>div{
+  	max-width: 340px;
+    
+  }
+  .d-none-sm{
+  	display: none;
+  }
+  .mrk-qty-box {
+    padding: 5px;
+  }
+}
+ <!-- Popup js -->
+$(document).ready(function () {
+  $(".trigger_popup_fricc").click(function(){
+     $('.hover_bkgr_fricc').show();
+  });
+  $('.popupCloseButton').click(function(){
+      $('.hover_bkgr_fricc').hide();
+  });
+});
