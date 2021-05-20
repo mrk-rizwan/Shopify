@@ -1,0 +1,63 @@
+<!-- add in product grid item  -->
+<form class="img-btn " class="price" method="post" action="/cart/add" data-productid="{{ product.id }}">
+          
+          <input name="id" data-productid="{{ product.id }}" value="{{ product.variants.first.id }}" type="hidden" />
+          <input type="number" id="Quantity-{{ product.id }}"
+                    name="quantity" value="1" min="1" pattern="[0-9]*"
+                    class="product-form__input product-form__input--quantity mrk-qty-box" data-quantity-input
+                  >
+          <input
+                     class="btn prod_button_sm" id = "{{ product.variants.first.id }}" name="add" value="ADD TO CART - {{ product.price | money }}" type="button" />
+</form>
+<!-- ATC CSS -->
+h5.mrk-added-to-cart {
+    margin: 10px 0 0 0;
+  	-webkit-animation:mrk-fadein 4s;
+}
+@-webkit-keyframes mrk-fadein {
+from {
+opacity:0;
+}
+to {
+opacity:1;
+}
+}
+
+@media (max-width: 667px){
+  .d-none-sm{
+  	display: none;
+  }
+  .mrk-qty-box {
+    padding: 5px;
+  }
+}
+
+
+<!-- ATC js -->
+ $('.prod_button_sm').click(function(){
+        var mrk_qty = $(this).parent().find('.product-form__input--quantity').val();
+        console.log(mrk_qty);
+    	$(this).replaceWith('<h5 class="mrk-added-to-cart">Added</h5>');
+    	var variant_id = $(this)[0].id;
+    	console.log(variant_id);
+    	addItemToCartAjaxApply(variant_id,mrk_qty);
+    
+  });
+function addItemToCartAjaxApply(variant_id, qty) {
+    data = {
+        "id": variant_id,
+        "quantity": qty,
+    };
+    jQuery.ajax({
+        type: 'POST',
+        url: '/cart/add.js',
+        data: data,
+        dataType: 'json',
+        success: function() {
+		console.log('success'+ window.mrk_qty);
+          
+        },
+        error: function (e) {
+        }
+    });
+}
