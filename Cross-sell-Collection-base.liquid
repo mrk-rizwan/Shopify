@@ -25,7 +25,6 @@ trigger_popup_fricc
   
   
   
-  {% comment %} create a upsell-items.liquid file {% endcomment %}
   {% comment %}
     Renders a product card using "List" style
 
@@ -53,7 +52,7 @@ trigger_popup_fricc
         {% assign my_item = product.title %}
         <form class="img-btn " class="price" method="post" action="/cart/add" data-productid="{{ product.id }}">
           
-          <input name="id" data-productid="{{ product.id }}" value="{{ product.variants.first.id }}" type="hidden" />
+          <input class="default-varient-id" name="id" data-productid="{{ product.id }}" value="{{ product.variants.first.id }}" type="hidden" />
           {% assign my_item_in_cart = 'false' %}
           {% for item in cart.items %}
         	{% assign cart_item = item.product.title %}
@@ -63,14 +62,25 @@ trigger_popup_fricc
           {% endif %}
           {% endfor %}
           {% if my_item_in_cart == 'false' %}
+          <div class="d-flex-mrk">
           <input type="number" id="Quantity-{{ product.id }}"
                     name="quantity" value="1" min="1" pattern="[0-9]*"
                     class="product-form__input product-form__input--quantity mrk-qty-box" data-quantity-input
                   >
+          <select name="id" id="ProductSelect-{{ product.id }}" class="mrk-product-form__variants {% if product.has_only_default_variant %} d-none-mrk {% endif %}">
+              {% for variant in product.variants %}
+                <option value="{{ variant.id }}"
+                  {%- if variant == current_variant %} selected="selected" {%- endif -%}
+                >
+                  {{ variant.title }}  {%- if variant.available == false %} - {{ 'products.product.sold_out' | t }}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
           <input
-                     class="btn prod_button_sm" id = "{{ product.variants.first.id }}" name="add" value="ADD TO CART - {{ product.price | money }}" type="button" />
+                     class="btn prod_button_sm" id = "{{ product.variants.first.id }}" name="add" value="ADD TO CART" type="button" />
         	{% else %}  
-          <p>Already In Cart</p>
+          <h5 class="mrk-added-to-cart">Already In Cart</h5>
           {% endif %}
         </form>
       </div>
@@ -87,7 +97,14 @@ trigger_popup_fricc
   
   
  <!-- Popup Css -->
- /* Upsell popup */
+ .mrk-upshells {
+    text-align: center;
+    padding: 20px 0;
+    border: 1px solid #eee;
+    box-shadow: inset 0px 0px 5px 4px var(--color-border);
+    filter: drop-shadow(0px 0px 40px rgba(0, 0, 0, 0.114));
+}
+/* Upsell popup */
 .hover_bkgr_fricc{
   background:rgba(0,0,0,.4);
   cursor:pointer;
@@ -112,7 +129,6 @@ trigger_popup_fricc
   background-color: #fff;
   box-shadow: 10px 10px 60px #555;
   display: -webkit-inline-box;
-  height: auto;
   max-width: 700px;
   min-height: 100px;
   vertical-align: top;
@@ -141,6 +157,7 @@ trigger_popup_fricc
 .popupCloseButton:hover {
   background-color: #ccc;
 }
+
 /* Popup box End */
 h5.mrk-added-to-cart {
     margin: 10px 0 0 0;
@@ -156,11 +173,17 @@ opacity:1;
 }
 .mrk-qty-box
 {
-    padding: 10px;
-    margin: 10px 0;
+    margin:  0 10px 0 0;
 }
 .mrk-collection-name{
 	text-align: center;
+}
+.d-flex-mrk {
+    display: flex;
+  	margin: 10px 0;
+}
+.d-none-mrk{
+	display: none;
 }
 @media (max-width: 667px){
   .hover_bkgr_fricc>div{
@@ -172,6 +195,14 @@ opacity:1;
   }
   .mrk-qty-box {
     padding: 5px;
+  }
+  .mrk-popup-content-left {
+    overflow-y: scroll;
+    height: 100%;
+}
+  .popupCloseButton{
+  	    top: 0px;
+    right: 0px;
   }
 }
  <!-- Popup js -->
