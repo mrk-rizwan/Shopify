@@ -1,0 +1,39 @@
+function addtocart_sm(){
+	var data = {
+	items: [
+		{
+			quantity: 1,
+			id: 40111435972808
+		},
+		{
+			quantity: 1,
+			id: 40111450030280
+		}
+	]
+};
+    jQuery.ajax({
+        type: 'POST',
+        url: '/cart/add.js',
+        data: data,
+        dataType: 'json',
+      	beforeSend :function(){
+      		$('.add-to-cart-bundle-sm').text('Adding..');
+          	$('.add-to-cart-bundle-sm').toggleClass('disabled');
+      	},
+        success: function() {
+		console.log('success'+ window.mrk_qty);
+        update_cart_count();
+        $('.add-to-cart-bundle-sm').text('Added');
+        setTimeout(function(){
+    		$('.add-to-cart-bundle-sm').text('ADD TO CART');
+          	$('.add-to-cart-bundle-sm').toggleClass('disabled');
+     	},2000);
+        },
+        error: function (e) {
+        }
+    });
+}
+$('.add-to-cart-bundle-sm').click(function(e){
+	e.preventDefault();
+  	addtocart_sm();
+});
