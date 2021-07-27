@@ -1,0 +1,32 @@
+Debut theme sticky header :
+
+
+$(function(){
+		$(window).scroll(function() {    
+		var height = $(window).scrollTop(); 
+		if(height  > 50) {
+			$(".site-header").addClass('mrk-sticky');
+            $('.site-header__logo').addClass('mrk-sticky-logo');
+            $('#AccessibleNav').addClass('mrk-sticky-nav');
+		} else{
+			$(".site-header").removeClass('mrk-sticky');
+            $('.site-header__logo').removeClass('mrk-sticky-logo');
+            $('#AccessibleNav').removeClass('mrk-sticky-nav');
+		}
+	});
+});
+
+
+.mrk-sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 99999;
+}
+
+.mrk-sticky-logo a img {
+    max-width: 60% !important;
+}
+.mrk-sticky-nav ul {
+    margin: 7px 0px;
+}
