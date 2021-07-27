@@ -1,0 +1,232 @@
+<label class="ajax-search-icon">
+	<input type="text" class="mrk-search-products" >
+  		{% render 'icon-search' %}
+</label>
+<ul class="mrk-ajax-url mrk-hidden mrk-url-product-width"></ul>
+<script>
+  function mrkajaxproductsearch(val){
+jQuery.getJSON("/search/suggest.json", {
+  "q" : val,
+  "resources": {
+    "types": ["product","collection"],
+    "limit": 10,
+    "options": {
+      "unavailable_products": "last",
+      "fields": "title,product_type,variants.title"
+    }
+  },
+  beforeSend(){
+  	$('.mrk-ajax-url').show();
+    $('.mrk-ajax-url').html('Searching...');
+  },
+}).done(function(response) {
+  var Suggestions = response.resources.results;
+  
+  if(Suggestions.products.length > 0 || Suggestions.collections.length > 0){
+  	$('.mrk-ajax-url').show();
+  
+  $('.mrk-ajax-url').html('');
+    {% if customer.tags contains 'wholesale' or customer.tags contains 'Whole-sale_Customer' %}
+    for(let i = 0; i < Suggestions.products.length; i++){
+      if(Suggestions.products[i].type == 'free-sample'){
+      	continue;
+      }
+      if(Suggestions.products[i].tags.includes('wholesale-only'))
+        	$('.mrk-ajax-url').append('<a href="'+Suggestions.products[i].url+'>"<li class="mrk-ajax-product mrk-adjust-content">'+ '<div class="mrk-d-flex"><img class="mrk-image" src="' + Suggestions.products[i].image + '">' + '<h3 class="mrk-ajax-product-title">' + Suggestions.products[i].title + '</h3>' +"</div><div class='mrk-svg-search'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 14'><path d='M.24.22a.75.75 0 00-.072.976l.072.084 5.465 5.47L.24 12.22a.75.75 0 00-.072.976l.072.084a.75.75 0 00.976.073l.084-.073 5.995-6a.75.75 0 00.073-.976l-.073-.084L1.3.22a.749.749 0 00-1.06 0z' fill='#1A1A1A' fill-rule='evenodd'/></svg></div></li></a>");
+    }
+    {% else %}
+    for(let i = 0; i < Suggestions.products.length; i++){
+      if(Suggestions.products[i].type == 'free-sample'){
+      	continue;
+      }
+      if(Suggestions.products[i].tags.includes('retailer-products'))
+        	$('.mrk-ajax-url').append('<a href="'+Suggestions.products[i].url+'>"<li class="mrk-ajax-product mrk-adjust-content">'+ '<div class="mrk-d-flex"><img class="mrk-image" src="' + Suggestions.products[i].image + '">' + '<h3 class="mrk-ajax-product-title">' + Suggestions.products[i].title + '</h3>' +"</div><div class='mrk-svg-search'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 14'><path d='M.24.22a.75.75 0 00-.072.976l.072.084 5.465 5.47L.24 12.22a.75.75 0 00-.072.976l.072.084a.75.75 0 00.976.073l.084-.073 5.995-6a.75.75 0 00.073-.976l-.073-.084L1.3.22a.749.749 0 00-1.06 0z' fill='#1A1A1A' fill-rule='evenodd'/></svg></div></li></a>");
+    }
+    {% endif %}
+   }
+  else{
+  	  	$('.mrk-ajax-url').html('Nothing Found');
+  }
+  if($('.mrk-url-product-width a').length == 0)
+  {
+      $('.mrk-url-product-width').html('Nothing Found');
+  }
+  });
+  }
+  $(".mrk-search-products").on("input", function(){
+        var val = $(this).val();
+    if(val){
+        mrkajaxproductsearch(val);
+    }
+    else{
+    	    $('.mrk-ajax-url').hide();
+    }
+     if($('.search-input').val() == ''){
+        $('.mrk-ajax-url').hide();
+      }
+    });
+    $(document).mouseup(function (e){
+
+    var container = $(".mrk-ajax-url.mrk-hidden");
+
+    if (!container.is(e.target) && container.has(e.target).length === 0){
+
+      container.fadeOut();
+      
+    }
+    });
+ 
+</script>
+
+
+
+
+Artical search
+
+
+<ul class="mrk-ajax-url mrk-hidden">
+</ul>
+<script>
+ function mrkajax(val) {
+    jQuery.getJSON("/search/suggest.json", {
+        "q": val,
+        "resources": {
+            "type": "article",
+            "limit": 10
+        },
+          beforeSend(){
+            $('.mrk-ajax-url').show();
+            $('.mrk-ajax-url').html('Searching...');
+          }
+    }).done(function (response) {
+        var Suggestions = response.resources.results;
+        $('.mrk-ajax-url').show();
+        if (Suggestions.articles.length > 0) {
+            $('.mrk-ajax-url').html('');
+            $('.mrk-ajax-url').append('<b class="mrk-heading">Articles</b><br>');
+            for (let i = 0; i < Suggestions.articles.length; i++) {
+                $('.mrk-ajax-url').append('<a href="' + Suggestions.articles[i].url + '>"<li class="mrk-ajax-product">' + '<img class="mrk-image" src="' + Suggestions.articles[i].image + '">' + '<h3 class="mrk-title">' + Suggestions.articles[i].title + '</h3>' + '</li></a>');
+            }
+        } else {
+            $('.mrk-ajax-url').html('Nothing Found');
+        }
+    });
+}
+$("form.search-form.search-bar__form").on("submit", function (e) {
+    e.preventDefault();
+    var val = $('.mrk-ajax-search-bar').val();
+    if (val) {
+        mrkajax(val);
+    } else {
+        $('.mrk-ajax-url').hide();
+    }
+});
+$(document).mouseup(function (e) {
+
+    var container = $(".mrk-ajax-url.mrk-hidden");
+
+    if (!container.is(e.target) && container.has(e.target).length === 0) {
+
+        container.fadeOut();
+
+    }
+});
+</script>
+
+
+
+
+
+CSS
+
+
+.mrk-ajax-url {
+    position: absolute;
+    background: #fff;
+    padding: 30px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    width: 100%;
+    margin-left: 0;
+  	z-index: 99;
+}
+
+.mrk-hidden {
+    display: none
+}
+
+.mrk-ajax-product {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    border-bottom: 1px solid;
+    padding: 20px 0
+}
+
+.mrk-image {
+    width: 80px
+}
+
+h3.mrk-title {
+    font-size: 18px;
+    margin-bottom: 5px;
+  	margin-left: 20px;
+}
+
+p.mrk-price {
+    margin-left: 20px
+}
+
+.mrk-ajax-product:last-child {
+    border: none
+}
+.mrk-ajax-product-title{
+	font-size: 16px;
+    margin-bottom: 5px;
+    margin-left: 20px;
+    font-weight: 100;
+}
+/* Search bar */
+.filters-toolbar
+{
+	    justify-content: flex-end;
+      padding: 0 30px;
+}
+.mrk-ajax-search-bar-div {
+    padding: 10px 0;
+    width: calc(100% - 270px);
+    float: right;
+}
+.ajax-search-icon svg {
+    position: absolute;
+    left: 10px;
+    height: 100%;
+}
+label.ajax-search-icon {
+    position: relative;
+}
+.mrk-search-products {
+    padding-left: 40px;
+    font-size: 20px;
+    width: 100%;
+}
+.mrk-url-product-width{
+	width: calc(100% - 330px);
+}
+.mrk-adjust-content{
+	justify-content: space-between;
+}
+.mrk-svg-search svg{
+	width: 10px;
+}
+.mrk-ajax-product-title{
+	font-size: 16px;
+    margin-bottom: 5px;
+    margin-left: 20px;
+    font-weight: 100;
+}
+@media (min-width: 1200px){
+  .mrk-nine-twelve{
+  	padding-right: 40px;
+  }
+}
