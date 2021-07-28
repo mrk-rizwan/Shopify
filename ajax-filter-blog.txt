@@ -1,0 +1,178 @@
+<div class="mrk-d-flex-just">
+  <h4 class="mrk-filters__title">Filter Recipes</h4><a href="#" class="mrk-reset-filters">Reset Filters</a>
+</div>
+	<div class="blog-filter-mrk">
+      {% render 'filter-search' %}
+	</div>
+	{% if section.settings.show_filters %}
+	<div class="blog-filter-mrk">
+        <label class="blog-filter__label select-label filter-head" for="BlogTagFilter">Filter by Categories</label>
+        <div class="">
+          <select id="BlogTagFilterCategories" class="mrk-dropdown-blog">
+            <option value="{{ blog.url }}">{{ 'blogs.article.all_topics' | t }}</option>
+            {% for tag in blog.all_tags %}
+            {% assign orignal_tag = tag | split: '-' %}
+            {% if orignal_tag[1] == 'category' %}
+              <option value="{{ tag | handleize }}" {% if current_tags contains tag %}selected{% endif %}>{{ orignal_tag[0] }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="blog-filter-mrk mrk-d-none">
+        <label class="blog-filter__label select-label filter-head" for="BlogTagFilter">Filter by Type</label>
+        <div class="">
+          <select id="BlogTagFilterType" class="mrk-dropdown-blog">
+            <option value="{{ blog.url }}">{{ 'blogs.article.all_topics' | t }}</option>
+            {% for tag in blog.all_tags %}
+            {% assign orignal_tag = tag | split: '-' %}
+            {% if orignal_tag[1] == 'type' %}
+              <option value="{{ tag | handleize }}" {% if current_tags contains tag %}selected{% endif %}>{{ orignal_tag[0] }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+	  <div class="blog-filter-mrk mrk-d-none">
+        <label class="blog-filter__label select-label filter-head" for="BlogTagFilter">Filter by Season</label>
+        <div class="">
+          <select id="BlogTagFilterSeason" class="mrk-dropdown-blog">
+            <option value="{{ blog.url }}">{{ 'blogs.article.all_topics' | t }}</option>
+            {% for tag in blog.all_tags %}
+            {% assign orignal_tag = tag | split: '-' %}
+            {% if orignal_tag[1] == 'season' %}
+              <option value="{{ tag | handleize }}" {% if current_tags contains tag %}selected{% endif %}>{{ orignal_tag[0] }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+	  <div class="blog-filter-mrk mrk-d-none">
+        <label class="blog-filter__label select-label filter-head" for="BlogTagFilter">Filter by Ingridient</label>
+        <div class="">
+          <select id="BlogTagFilterIngridient" class="mrk-dropdown-blog">
+            <option value="{{ blog.url }}">{{ 'blogs.article.all_topics' | t }}</option>
+            {% for tag in blog.all_tags %}
+            {% assign orignal_tag = tag | split: '-' %}
+            {% if orignal_tag[1] == 'ingridient' %}
+              <option value="{{ tag | handleize }}" {% if current_tags contains tag %}selected{% endif %}>{{ orignal_tag[0] }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    {% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  	if ($('ul#filtered-data').html() == '\n        \n      ') {
+    $('ul#filtered-data').html('<h2 class="page-width">Nothing Found</h2>');
+}
+var blog = '{{ blog.url }}';
+$('#BlogTagFilterType, #BlogTagFilterSeason, #BlogTagFilterIngridient, #BlogTagFilterCategories').change(function() {
+    var load_more_spinner = $('.load-more-spinner');
+    var blog_data = $('#filtered-data');
+    if ($('#BlogTagFilterType').find(":selected").text() == 'All topics') {
+        var type = '';
+    } else {
+        var type = '+' + $('#BlogTagFilterType').find(":selected").val();
+    }
+    if ($('#BlogTagFilterSeason').find(":selected").text() == 'All topics') {
+        var season = '';
+    } else {
+        var season = '+' + $('#BlogTagFilterSeason').find(":selected").val();
+    }
+    if ($('#BlogTagFilterIngridient').find(":selected").text() == 'All topics') {
+        var ingr = '';
+    } else {
+        var ingr = '+' + $('#BlogTagFilterIngridient').find(":selected").val();
+    }
+  	if ($('#BlogTagFilterCategories').find(":selected").text() == 'All topics') {
+        var cat = '';
+    } else {
+        var cat = $('#BlogTagFilterCategories').find(":selected").val();
+    }
+
+    var url = blog + '/tagged/' + cat + type + season + ingr;
+    console.log(url);
+    if (url != blog + '/tagged/') {
+        window.history.replaceState('Filter', 'Filter', url);
+        loadblogs(url, load_more_spinner, blog_data);
+    } else {
+        var url = blog;
+        window.history.replaceState('Filter', 'Filter', url);
+        loadblogs(url, load_more_spinner, blog_data);
+    }
+});
+$('.mrk-reset-filters').click(function() {
+    var load_more_spinner = $('.load-more-spinner');
+    var blog_data = $('#filtered-data');
+    var url = blog;
+    $('input.search-form__input.mrk-ajax-search-bar').val('');
+    if (window.location.pathname != url) {
+        $("#BlogTagFilterType option:selected, #BlogTagFilterSeason option:selected, #BlogTagFilterIngridient option:selected, #BlogTagFilterCategories option:selected").prop("selected", false)
+        window.history.replaceState('Filter', 'Filter', url);
+        loadblogs(url, load_more_spinner, blog_data);
+    }
+});
+
+function loadblogs(url, load_more_spinner, blog_data) {
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'html',
+        beforeSend() {
+            blog_data.hide();
+            load_more_spinner.show();
+        }
+    }).done(function(data) {
+        var blogs = $(data).find('#filtered-data');
+        $('#filtered-data').html(blogs.html());
+        load_more_spinner.hide();
+        blog_data.show();
+        if ($('ul#filtered-data').html() == '\n        \n      ') {
+            $('ul#filtered-data').html('<h2 class="page-width">Nothing Found</h2>');
+        }
+    });
+}
+  	
+</script>
+
+
+
+
+
+.mrk-dropdown-blog {
+    display: block;
+    font-size: 14px;
+    color: #fff;
+    line-height: 1.3;
+    padding: 18px 18px 18px 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    border-radius: 0;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--color-btn-primary);
+    background-image: url(data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E);
+    background-repeat: no-repeat, repeat;
+    background-position: right .7em top 50%, 0 0;
+    background-size: .65em auto, 100%;
+}

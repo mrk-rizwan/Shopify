@@ -1,0 +1,255 @@
+{% paginate blog.articles by 12 %}
+
+<div class="page-width">
+  <header class="section-header text-center">
+    <h1>{{ page_title }}</h1>
+  </header>
+</div>
+{% if section.settings.layout == 'grid' %}
+  <div class="page-width-mrk">
+    <div class="grid">
+      <div class="grid__item lg-width-15 md-width-25 mrk-filter-sidebar mrk-d-none-sm">
+        {% render 'blog-filter' %}
+      </div>
+      <div class="mobile-sidebar">
+          <div class="text-right">
+                    <div class="mrk-dropbtn mrk-filter-btn">
+                      Filter                  </div>
+          </div>
+          <div class="sidebar-inner mrk-border-radius display-none mrk-mobile-sidebar-inner mrk-filter-sidebar">
+              {% render 'blog-filter' %}	
+           </div>
+        </div>
+      <div class="grid__item lg-width-85 md-width-75 mrk-mt-30">
+        <div class="load-more-spinner"></div>
+      	<ul class="grid grid--uniform grid--blog" id="filtered-data">
+        {% for article in blog.articles %}
+          {% render 'blog-grid-item-new' article : article %}
+        {% endfor %}
+      </ul>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <ul class="blog-list-view">
+    {% for article in blog.articles %}
+      {% render 'blog-list-item' %}
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{%- if paginate.pages > 1 -%}
+  {% include 'pagination', paginate: paginate %}
+{%- endif -%}
+
+{% endpaginate %}
+
+<script>
+  	if ($('ul#filtered-data').html() == '\n        \n      ') {
+    $('ul#filtered-data').html('<h2 class="page-width">Nothing Found</h2>');
+}
+var blog = '{{ blog.url }}';
+$('#BlogTagFilterType, #BlogTagFilterSeason, #BlogTagFilterIngridient, #BlogTagFilterCategories').change(function() {
+    var load_more_spinner = $('.load-more-spinner');
+    var blog_data = $('#filtered-data');
+    if ($('#BlogTagFilterType').find(":selected").text() == 'All topics') {
+        var type = '';
+    } else {
+        var type = '+' + $('#BlogTagFilterType').find(":selected").val();
+    }
+    if ($('#BlogTagFilterSeason').find(":selected").text() == 'All topics') {
+        var season = '';
+    } else {
+        var season = '+' + $('#BlogTagFilterSeason').find(":selected").val();
+    }
+    if ($('#BlogTagFilterIngridient').find(":selected").text() == 'All topics') {
+        var ingr = '';
+    } else {
+        var ingr = '+' + $('#BlogTagFilterIngridient').find(":selected").val();
+    }
+  	if ($('#BlogTagFilterCategories').find(":selected").text() == 'All topics') {
+        var cat = '';
+    } else {
+        var cat = $('#BlogTagFilterCategories').find(":selected").val();
+    }
+
+    var url = blog + '/tagged/' + cat + type + season + ingr;
+    console.log(url);
+    if (url != blog + '/tagged/') {
+        window.history.replaceState('Filter', 'Filter', url);
+        loadblogs(url, load_more_spinner, blog_data);
+    } else {
+        var url = blog;
+        window.history.replaceState('Filter', 'Filter', url);
+        loadblogs(url, load_more_spinner, blog_data);
+    }
+});
+$('.mrk-reset-filters').click(function() {
+    var load_more_spinner = $('.load-more-spinner');
+    var blog_data = $('#filtered-data');
+    var url = blog;
+    $('input.search-form__input.mrk-ajax-search-bar').val('');
+    if (window.location.pathname != url) {
+        $("#BlogTagFilterType option:selected, #BlogTagFilterSeason option:selected, #BlogTagFilterIngridient option:selected, #BlogTagFilterCategories option:selected").prop("selected", false)
+        window.history.replaceState('Filter', 'Filter', url);
+        loadblogs(url, load_more_spinner, blog_data);
+    }
+});
+
+function loadblogs(url, load_more_spinner, blog_data) {
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'html',
+        beforeSend() {
+            blog_data.hide();
+            load_more_spinner.show();
+        }
+    }).done(function(data) {
+        var blogs = $(data).find('#filtered-data');
+        $('#filtered-data').html(blogs.html());
+        load_more_spinner.hide();
+        blog_data.show();
+        if ($('ul#filtered-data').html() == '\n        \n      ') {
+            $('ul#filtered-data').html('<h2 class="page-width">Nothing Found</h2>');
+        }
+    });
+}
+  	
+</script>
+
+{% schema %}
+{
+  "name": {
+    "cs": "Stránky blogu",
+    "da": "Blogsider",
+    "de": "Blogseiten",
+    "en": "Blog pages",
+    "es": "Páginas del blog",
+    "fi": "Blogisivut",
+    "fr": "Pages du blog",
+    "it": "Pagine del blog",
+    "ja": "ブログページ",
+    "ko": "블로그 페이지",
+    "nb": "Bloggsider",
+    "nl": "Blogpagina's",
+    "pl": "Strony blogu",
+    "pt-BR": "Páginas do blog",
+    "pt-PT": "Páginas do blogue",
+    "sv": "Bloggsidor",
+    "th": "หน้าบล็อก",
+    "tr": "Blog sayfaları",
+    "vi": "Trang blog",
+    "zh-CN": "博客页面",
+    "zh-TW": "網誌頁面"
+  },
+  "settings": [
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "default": "list",
+      "options": [
+        {
+          "value": "grid",
+          "label": {
+            "cs": "Mřížka",
+            "da": "Gitter",
+            "de": "Raster",
+            "en": "Grid",
+            "es": "Cuadrícula",
+            "fi": "Ruudukko",
+            "fr": "Grille",
+            "it": "Griglia",
+            "ja": "グリッド",
+            "ko": "그리드",
+            "nb": "Rutenett",
+            "nl": "Grid",
+            "pl": "Siatka",
+            "pt-BR": "Grade",
+            "pt-PT": "Grelha",
+            "sv": "Rutnät",
+            "th": "กริด",
+            "tr": "Izgara",
+            "vi": "Lưới",
+            "zh-CN": "网格",
+            "zh-TW": "網格"
+          }
+        },
+        {
+          "value": "list",
+          "label": {
+            "cs": "Seznam",
+            "da": "Liste",
+            "de": "Liste",
+            "en": "List",
+            "es": "Lista",
+            "fi": "Luettelo",
+            "fr": "Liste",
+            "it": "Elenco",
+            "ja": "リスト",
+            "ko": "목록",
+            "nb": "Liste",
+            "nl": "Lijst",
+            "pl": "Lista",
+            "pt-BR": "Lista",
+            "pt-PT": "Lista",
+            "sv": "Lista",
+            "th": "รายการ",
+            "tr": "Liste",
+            "vi": "Danh sách",
+            "zh-CN": "列表",
+            "zh-TW": "清單"
+          }
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "blog_show_author",
+      "label": {
+        "cs": "Zobrazit autora",
+        "da": "Vis forfatter",
+        "de": "Autor anzeigen",
+        "en": "Show author",
+        "es": "Mostrar autor",
+        "fi": "Näytä tekijä",
+        "fr": "Afficher l'auteur",
+        "it": "Mostra autore",
+        "ja": "執筆者を表示する",
+        "ko": "작성자 표시",
+        "nb": "Vis forfatter",
+        "nl": "Auteur weergeven",
+        "pl": "Pokaż autora",
+        "pt-BR": "Exibir autor",
+        "pt-PT": "Mostrar autor",
+        "sv": "Visa författare",
+        "th": "แสดงผู้เขียน",
+        "tr": "Yazarı göster",
+        "vi": "Hiển thị tác giả",
+        "zh-CN": "显示作者",
+        "zh-TW": "顯示作者"
+      },
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "blog_show_date",
+      "label": "Show Date",
+      "default": true
+    },
+	{
+      "type": "checkbox",
+      "id": "show_filters",
+      "label": "Show Filters",
+      "default": true
+    },
+	{
+    "type": "link_list",
+    "id": "blog_menu",
+    "label": "Blog List",
+    "default": "main-menu"
+	}
+  ]
+}
+{% endschema %}
