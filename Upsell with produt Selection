@@ -1,0 +1,361 @@
+<!-- create section with this code -->
+<div class="mrk-popup-content-left upsell-popup">
+        <div class="popupCloseButton">×</div>
+  <div>
+    <div class="text-center">
+      <h3>{{ section.settings.heading }}</h3>
+      <p>{{ section.settings.sub_heading }}</p>
+    </div>
+    <div class="upsell Products mt-20">
+          <!-- Blocks -->
+            {%- assign open_product = product.id -%}
+          {%- for block in section.blocks -%}
+            {%- assign in_cart = false -%}
+            {%- assign in_stock = false -%}
+            {%- assign valid_upsell = false -%}
+            {%- assign trigger_empty = false -%}
+            {%- if block.settings.mrk_upsell_popup_product_trigger != blank -%}
+              {%- assign product_trigger = all_products[block.settings.mrk_upsell_popup_product_trigger] -%}
+            {%- else -%}
+              {%- assign trigger_empty = true -%}
+            {%- endif -%}
+            {%- if block.settings.mrk_upsell_popup_product_offer1 != blank -%}
+              {%- assign product_offer1 = all_products[block.settings.mrk_upsell_popup_product_offer1] -%}
+            {%- endif -%}
+            {%- if block.settings.mrk_upsell_popup_product_offer2 != blank -%}
+              {%- assign product_offer2 = all_products[block.settings.mrk_upsell_popup_product_offer2] -%}
+            {%- endif -%}
+            {%- if block.settings.mrk_upsell_popup_product_offer3 != blank -%}
+              {%- assign product_offer3 = all_products[block.settings.mrk_upsell_popup_product_offer3] -%}
+            {%- endif -%}
+            {%- if block.settings.mrk_upsell_popup_product_offer4 != blank -%}
+              {%- assign product_offer4 = all_products[block.settings.mrk_upsell_popup_product_offer4] -%}
+            {%- endif -%}
+            {%- if block.settings.mrk_upsell_popup_product_offer5 != blank -%}
+              {%- assign product_offer5 = all_products[block.settings.mrk_upsell_popup_product_offer5] -%}
+            {%- endif -%}
+              {%- assign product_trigger_id = product_trigger.id -%}
+            {% if product_trigger_id == open_product %}
+              <script>
+                  $('.mrk-form-submit-options').addClass('show_upsell');
+              </script>
+              {% if product_offer1 %}
+              <li class="list-view-item">
+                    {% include 'upsell-items', product: product_offer1 %}
+              </li>
+              {% endif %}
+              {% if product_offer2 %}
+                <li class="list-view-item">
+                        {% include 'upsell-items', product: product_offer2 %}
+                  </li>
+          {% endif %}
+              {% if product_offer3 %}
+                <li class="list-view-item">
+                        {% include 'upsell-items', product: product_offer3 %}
+                  </li>
+          {% endif %}
+              {% if product_offer4 %}
+                <li class="list-view-item">
+                        {% include 'upsell-items', product: product_offer4 %}
+                  </li>
+          {% endif %}
+              {% if product_offer5 %}
+                <li class="list-view-item">
+                        {% include 'upsell-items', product: product_offer5 %}
+                  </li>
+          {% endif %}
+            {% endif %}
+          {%- endfor -%}
+    	</div>
+    <div class="text-center mt-20"><button class="close-btn btn">{{ section.settings.no_thanks }}</button></div>
+      </div>
+  </div>
+<script>
+  $('.show_upsell').click(function(){
+  	$('.upsell-popup').fadeIn();
+  });
+  $('.popupCloseButton, .close-btn').click(function(){
+  	$('.upsell-popup').fadeOut();
+  });
+  $('.upsell_item').click(function(e){
+	e.preventDefault();
+  	var btn = $(this);
+    var btn_text = $(this).val();
+  	var qty = $(this).closest('div').find('input.upsell_qty').val();
+    var id = $(this).closest('form').find('.mrk-product-form__variants option:selected').val();
+  	add_to_cart_upsell(id,qty, btn, btn_text);
+});
+ function update_cart_count(){
+$.ajax({
+            type: 'GET',
+            url: '/cart',
+            dataType: 'html',
+            success: function (cart) {
+                var data = $(cart).find('#CartCount');
+                $('#CartCount').replaceWith(data);
+            }
+        });
+}
+function add_to_cart_upsell(product_id, qty, product_btn, btn_text){
+  console.log(qty);
+  	var btn = product_btn;
+	var data = {
+	items: [
+		{
+			quantity: qty,
+			id: product_id
+		}
+	]
+};
+    jQuery.ajax({
+        type: 'POST',
+        url: '/cart/add.js',
+        data: data,
+        dataType: 'json',
+      	beforeSend :function(){
+      		btn.val('Adding..');
+          	btn.toggleClass('disabled');
+      	},
+        success: function() {
+        update_cart_count();
+        btn.val('Added');
+        setTimeout(function(){
+    		btn.val(btn_text);
+          	btn.toggleClass('disabled');
+          	
+     	},2000);
+        },
+        error: function (e) {
+        }
+    });
+}
+</script>
+{%- schema -%}
+  {
+    "name": "Upsell pop-up",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Upsell"
+      },
+      {
+        "type": "text",
+        "id": "heading",
+        "label": "Heading text",
+        "default": "Frequently Bought Together"
+      },
+{
+        "type": "text",
+        "id": "sub_heading",
+        "label": "Sub Heading text",
+        "default": "Frequently Bought Together"
+      },
+      {
+        "type": "text",
+        "id": "no_thanks",
+        "label": "Decline offer text",
+        "default": "No thanks"
+      }
+    ],
+    "blocks" : [
+      {
+        "type": "upsell",
+        "name": "Upsell",
+        "settings": [
+          {
+            "type": "product",
+            "id": "mrk_upsell_popup_product_trigger",
+            "label": "Product trigger",
+            "info": "Leave empty to trigger on all products"
+          },
+          {
+            "type": "product",
+            "id": "mrk_upsell_popup_product_offer1",
+            "label": "Product offer"
+          },
+		  {
+            "type": "product",
+            "id": "mrk_upsell_popup_product_offer2",
+            "label": "Product offer"
+          },
+		{
+            "type": "product",
+            "id": "mrk_upsell_popup_product_offer3",
+            "label": "Product offer"
+          },
+		{
+            "type": "product",
+            "id": "mrk_upsell_popup_product_offer4",
+            "label": "Product offer"
+          },
+		{
+            "type": "product",
+            "id": "mrk_upsell_popup_product_offer5",
+            "label": "Product offer"
+          }
+          
+        ]
+      }
+    ]
+  }
+{%- endschema -%}
+
+
+<!-- Create snippet with this code -->
+{% comment %}
+    Renders a product card using "List" style
+
+    Accepts:
+    - product: {Object} Product Liquid object (required)
+    - show_vendor: {Boolean} Show the product's vendor depending on the section setting (optional)
+
+    Usage:
+    {% include 'product-card-list', product: product, show_vendor: section.settings.show_vendor %}
+{% endcomment %}
+<div class="product-card product-card--list">
+    <div class="list-view-item__link mrk-mob-list">
+      <div class="list-view-item__image-column mrk-upsell-img">
+        <div class="list-view-item__image-wrapper product-card__image-wrapper">
+        {% unless product.featured_media == null %}
+          <img class="list-view-item__image" src="{{ product.featured_media | img_url: '150x' }}" alt="{{ product.featured_media.alt }}">
+        {% endunless %}
+        </div>
+      </div>
+  
+      <div class="list-view-item__title-column">
+        <div class="list-view-item__title" aria-hidden="true">
+          <a href="{{product.url}}" target="_blank"><span class="product-card__title">{{ product.title }}</span></a>
+        </div>
+        {% assign my_item = product.title %}
+        <form class="img-btn" class="price" method="post" action="/cart/add" data-productid="{{ product.id }}">
+          
+          <input name="id" data-productid="{{ product.id }}" value="{{ product.variants.first.id }}" type="hidden" />
+          {% assign my_item_in_cart = 'false' %}
+          {% for item in cart.items %}
+        	{% assign cart_item = item.product.title %}
+          {% if my_item == cart_item %}
+          {% assign my_item_in_cart = 'true' %}
+          
+          {% endif %}
+          {% endfor %}
+          <select name="id" id="ProductSelect-{{ product.id }}" selector-id="mrk-price-{{product.id}}" class="mrk-product-form__variants mt-10-sm {% if product.has_only_default_variant %}hide{% endif %}">
+              {% for variant in product.variants %}
+                <option price = "{{ variant.price | money }}" value="{{ variant.id }}"
+                  {%- if variant == current_variant %} selected="selected" {%- endif -%}
+                >
+                  {{ variant.title }} {%- if variant.available == false %} - {{ 'products.product.sold_out' | t }}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          <div class="mrk-d-flex mt-10-sm">
+            <input type="number" min="1" value="1" class="upsell_qty" />
+            <input
+                       class="btn upsell_item" name="add" product_name="{{product.title}}" variant_id="{{ product.variants.first.id }}" value="ADD TO CART{% if product.has_only_default_variant %} - {{ product.price | money }}{% endif %}" type="button" />
+            
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Popup CSS -->
+  
+.mrk-popup-content-left{
+  text-align: left;
+}
+.mrk-popup-content-left {
+    display: none;
+    background-color: #fff;
+    box-shadow: 17px 20px 60px 4000px #838383d6;
+    min-height: 100px;
+    max-width: calc(50% - 50px);
+    width: 100%;
+    position: fixed;
+    border-radius: 8px;
+    padding: 15px 5%;
+    margin: auto;
+    left: calc(25%);
+    top: 100px;
+    z-index: 9999999;
+}
+.popupCloseButton:hover{
+    color: #000;
+}
+.popupCloseButton {
+  background-color: var(--color-btn-primary);
+  color: white;
+  border: 3px solid #999;
+  border-radius: 50px;
+  cursor: pointer;
+  display: inline-block;
+  font-family: arial;
+  font-weight: bold;
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  font-size: 25px;
+  line-height: 26px;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+}
+.popupCloseButton:hover {
+  background-color: #ccc;
+}
+.mt-10-sm{
+  	margin-top: 10px;
+  }
+input.upsell_qty {
+    width: 20%;
+  margin-right: 10px;
+}
+.upsell_item {
+    width: 80% !important;
+      
+}
+.mrk-product-form__variants{
+	width: 100% !important;
+}
+.list-view-item__image {
+  max-height: 150px !important;
+  width: 150px !important;
+}
+
+.list-view-item__image-column {
+  width: 160px !important;
+}
+.mt-20{
+	margin-top: 20px;
+}
+.upsell.Products {
+    max-height: 250px;
+    overflow-y: auto;
+}
+.upsell.Products::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
+}
+@media (max-width: 998px){
+  .mrk-popup-content-left {
+  	max-width: calc(100% - 40px) !important;
+    left: calc(20px) !important;
+  }
+  .mrk-mob-list {
+    display: grid !important;
+    text-align: center;
+}
+  .mrk-upsell-img {
+    margin: auto;
+  }
+  .list-view-item__image-column{
+    width: 150px;
+  }
+  .list-view-item__image-wrapper {
+    margin-right: 0 !important;
+}
+  .upsell.Products {
+    max-height: 300px;
+    overflow-y: auto;
+}
+}
+/* Popup box End */
