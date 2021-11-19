@@ -1,0 +1,42 @@
+const mrk_timeLeft = (mrk_currentTime, futureTime) => {
+    let mrk_diffMS = futureTime.getTime() / 1000 - mrk_currentTime.getTime() / 1000;
+    let mrk_diffHr = Math.floor(mrk_diffMS / 3600);
+    mrk_diffMS = mrk_diffMS - mrk_diffHr * 3600;
+    let mrk_diffMi = Math.floor(mrk_diffMS / 60);
+    if( mrk_diffMi < 10)mrk_diffMi='0'+mrk_diffMi;
+    mrk_diffMS = mrk_diffMS - mrk_diffMi * 60;
+    let mrk_diffS = Math.floor(mrk_diffMS);
+    if( mrk_diffS < 10)mrk_diffS='0'+mrk_diffS;
+  document.querySelector(".count-down-timer").innerHTML = mrk_diffHr+'h ' + mrk_diffMi +'m ' + mrk_diffS+'s';
+  };
+
+  setInterval(() => {
+              let mrk_toDate = new Date(
+              Date.parse(
+              new Date().toLocaleString("en-US", {
+    timeZone: "America/Los_Angeles",
+  })
+  )
+  );
+  let mrk_midday = new Date(
+    Date.parse(
+      new Date().toLocaleString("en-US", {
+        timeZone: "America/Los_Angeles",
+      })
+    )
+  );
+  let mrk_midnight = new Date(
+    Date.parse(
+      new Date().toLocaleString("en-US", {
+        timeZone: "America/Los_Angeles",
+      })
+    )
+  );
+  mrk_midday.setHours(12, 0, 0, 0);
+  mrk_midnight.setHours(24, 0, 0, 0);
+  if (mrk_toDate.getHours() >= mrk_midday.getHours()) {
+    mrk_timeLeft(mrk_toDate, mrk_midnight);
+  } else {
+    mrk_timeLeft(mrk_toDate, mrk_midday);
+  }
+  }, 1000);
