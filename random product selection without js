@@ -1,0 +1,133 @@
+<!-- random product selection -->
+<div class="mrk-product-single-reviews" style="background-color: #f3f4f7!important;" >
+  <div class="wrapper">
+    <div class="home-public-heading">
+				<h3>{{ section.settings.heading }}</h3>
+	</div>
+    {% assign min = 0 %}
+    {% assign max = section.blocks.size |minus: 3 %}
+    {% assign diff = max | minus: min %}
+    {% assign randomNumber = "now" | date: "%N" | modulo: diff | plus: min %}
+  	<div class="mrk-review-slider">
+			{% for block in section.blocks %}
+			<div class="mrk-review-inner text-center">
+              {% if block.settings.image != blank %}
+              {% assign image =  block.settings.image %}
+              {% else %}
+              {% assign image = product.images[0] %}
+              {% endif %}
+						<a href="{{block.settings.btn_link}}"><img class="lazyload blur-up width-100 mrk-image-1 mrk-detailed-review-images" 
+                             {% unless image contains '.png' %}
+                                   data-srcset="{{ image | product_img_url: '1500x', format: 'pjpg' }} 1500w, {{ image | product_img_url: '960x', format: 'pjpg' }} 960w" 
+                                   {% else %}
+                                   data-srcset="{{ image | product_img_url: '1500x' }} 1500w, {{ image | product_img_url: '960x' }} 960w" 
+                                   {% endunless %}
+                                   alt="{{ image.alt | escape }}"
+                                                                   /></a>
+              <h4>{{ block.settings.name }}</h4>
+              <div class="star-container">
+              {% for i in (1..5) %}
+                                <i data-feather="star"></i>
+                            {% endfor %}
+              </div>
+              <div class="review-content">{{block.settings.review}}</div>
+              <a href="{{block.settings.btn_link}}">{{block.settings.btn_text}}</a>
+      		</div>
+			{% endfor %}
+	</div>
+  </div>
+</div>
+<script>
+
+  $(function(){
+    var total = {{section.blocks.size}};
+    var removed = 0;
+    for(var i = 1; i<= 100; i++){
+        if($('.mrk-review-slider .mrk-review-inner').length != 4){
+        var random = Math.floor(Math.random()*(total)+1);
+        $(`.mrk-review-slider .mrk-review-inner:nth-child(${random})`).remove();
+        removed++;
+        if($('.mrk-review-slider .mrk-review-inner').length == 4)
+            break;
+        }
+    }
+  	$('.mrk-review-slider').slick({
+      infinite: false,
+      slidesToShow: 4,
+      slidesToScroll: 1,
+      dots: true,
+      arrows: true,
+        responsive: [
+    {
+      breakpoint: 1000,
+      settings: {
+      slidesToShow: 2,
+      slidesToScroll: 1,
+      }
+    },
+          {
+      breakpoint: 610,
+      settings: "unslick"
+    },
+          {
+      breakpoint: 600,
+      settings: {
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      }
+    }
+  ]
+    });
+});
+</script>
+{% schema %}
+	{
+		"name": "Reviews",
+		"settings": [
+    			{
+                    "type": "text",
+                    "id": "heading",
+                    "label": "Heading"
+                  }
+				],
+		"blocks": [
+			{
+				"type": "review",
+				"name": "Review",
+				"settings": [
+					{
+						"type": "image_picker",
+						"id": "image",
+						"label": "Product Image"
+					},
+					{
+						"type": "product",
+						"id": "product",
+						"label": "Product"
+					},
+					{
+						"type": "text",
+						"id": "name",
+						"label": "Customer Name"
+					},
+					{
+						"type": "richtext",
+						"id": "review",
+						"label": "Review Content"
+					},
+					
+					{
+						"type": "text",
+						"id": "btn_text",
+						"label": "Button Text"
+					},
+					{
+						"type": "url",
+						"id": "btn_link",
+						"label": "Button link"
+					}
+				]
+			}
+		]
+	}
+{% endschema %}
