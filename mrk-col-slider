@@ -1,0 +1,217 @@
+<div class="mrk-slider">
+    <div class="single-product__content__info">
+        <div class="backgrounds">
+            {% for block in section.blocks %}
+            <div class="backgrounds__item backgrounds__item--{{forloop.index}} {% if forloop.first %}background backgrounds__item--active{% endif %}">
+                <div class="background__bg" style="background-image: url({{block.settings.image | img_url: 'master'}});"></div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="columns">
+            {% for block in section.blocks %}
+            <div class="columns__item {% if forloop.first %}columns__item--active{% endif %}" data-index="{{forloop.index}}">
+                <div class="product__info">
+
+                    <div class="product__info__label">{{block.settings.title }}</div>
+
+                    <div class="product__info__content">
+
+                        <div class="product__info__content__title">{{block.settings.title}}</div>
+
+                        <div class="product__info__content__description">
+                            {{block.settings.text}}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<style>
+    .mrk-slider .single-product__content__info {
+        position: relative;
+        height: 60vh;
+        min-height: 460px
+    }
+    
+    @media all and (max-width: 1023px) {
+        .mrk-slider .single-product__content__info {
+            padding: 0px;
+            display: none
+        }
+    }
+    
+    .mrk-slider .single-product__content__info .backgrounds {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 100vw;
+        height: 100%;
+        -webkit-transform: translateX(-50%);
+        transform: translateX(-50%);
+        background-color: #000
+    }
+    
+    .mrk-slider .single-product__content__info .backgrounds__item {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-position: center;
+        background-size: cover;
+        opacity: 0;
+        visibility: hidden;
+        -webkit-transition: all 700ms cubic-bezier(0.8, 0, 0.13, 0.99);
+        transition: all 700ms cubic-bezier(0.8, 0, 0.13, 0.99)
+    }
+    
+    .mrk-slider .single-product__content__info .backgrounds__item--active {
+        opacity: 0.6;
+        visibility: visible
+    }
+    
+    .mrk-slider .single-product__content__info .columns {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 100vw;
+        height: 100%;
+        -webkit-transform: translateX(-50%);
+        transform: translateX(-50%)
+    }
+    
+    @media all and (max-width: 1023px) {
+        .mrk-slider .single-product__content__info .columns {
+            display: block
+        }
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item {
+        position: relative;
+        width: 33.33%;
+        -webkit-transition: all 700ms cubic-bezier(0.8, 0, 0.13, 0.99);
+        transition: all 700ms cubic-bezier(0.8, 0, 0.13, 0.99);
+        cursor: pointer
+    }
+    
+    @media all and (max-width: 1023px) {
+        .mrk-slider .single-product__content__info .columns__item {
+            width: 100%
+        }
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item:before {
+        content: "";
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #000;
+        opacity: 0.1;
+        pointer-events: none;
+        z-index: 0;
+        -webkit-transition: all 350ms ease-in-out;
+        transition: all 350ms ease-in-out;
+        will-change: opacity
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item .product__info {
+        color: #fff;
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item .product__info__label {
+        position: absolute;
+        font-size: 24px;
+        font-weight: bold;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+        -webkit-transition: all 350ms ease-in-out;
+        transition: all 350ms ease-in-out;
+        -webkit-transition-delay: 700ms;
+        transition-delay: 700ms
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item .product__info__content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+        width: 60%;
+        max-width: 500px;
+        opacity: 0;
+        -webkit-transition: all 350ms ease-in-out;
+        transition: all 350ms ease-in-out;
+        -webkit-transition-delay: 0ms;
+        transition-delay: 0ms
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item .product__info__content__title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item--active {
+        width: 50%
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item--active:before {
+        opacity: 0
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item--active .product__info__label {
+        opacity: 0;
+        -webkit-transition-delay: 0ms;
+        transition-delay: 0ms;
+        -webkit-transition: all 350ms ease-in-out;
+        transition: all 350ms ease-in-out
+    }
+    
+    .mrk-slider .single-product__content__info .columns__item--active .product__info__content {
+        opacity: 1;
+        -webkit-transition: all 350ms ease-in-out;
+        transition: all 350ms ease-in-out;
+        -webkit-transition-delay: 700ms;
+        transition-delay: 700ms
+    }
+    
+    .background__bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-position: center;
+        background-size: cover;
+    }
+</style>
+<script>
+    $(function() {
+        $('.columns__item').hover(function() {
+            $('.columns__item').each(function() {
+                $(this).removeClass('columns__item--active');
+            });
+            $(this).addClass('columns__item--active');
+            var bg_tab = $(this).attr('data-index');
+            $('.backgrounds__item').each(function() {
+                $(this).removeClass('backgrounds__item--active');
+            });
+            $(`.backgrounds__item--${bg_tab}`).addClass('backgrounds__item--active');
+        });
+    })
+</script>
+{% schema %} { "name": "Columnn Slider", "class": "index-section", "settings": [ ], "blocks": [ { "type": "Column", "name": "Column", "settings": [ { "type": "text", "id": "title", "label": "Title" }, { "type": "richtext", "id": "text", "label": "Text"
+}, { "type": "image_picker", "id": "image", "label": "BG Image" } ] } ], "presets": [ { "name": "Columnn Slider", "blocks": [ { "type": "Column" } ] } ] } {% endschema %}
