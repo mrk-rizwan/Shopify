@@ -1,0 +1,239 @@
+{%- unless product.has_only_default_variant -%}
+      <variant-selects-mrk>
+      <div class="mrk-product-item">
+        		<variant-radios-mrk class="no-js-hidden" data-section="{{ section.id }}" data-url="{{ product.url }}" data-update-url="false" {{ block.shopify_attributes }}>
+                  {%- for option in product.options_with_values -%}
+					{% if option.name contains 'olor' %}
+                  		<fieldset>
+                          <legend class="form__label shop_heading">{{ option.name }} <span class="mrk_selected_opt"></span></legend>
+                              {%- for value in option.values -%}
+                              <div class="size_select mrk-option">
+                                <input type="radio" id="{{ product.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                                      name="{{ product.id }}-{{ option.name }}"
+                                      value="{{ value | escape }}"
+                                      form="{{ product_form_id }}"
+                                      {% if option.selected_value == value %}checked{% endif %}
+                                >
+                                <label for="{{ product.id }}-{{ option.position }}-{{ forloop.index0 }}" title="{{ value }}">
+                                  <span class="tool-tip">{{value}}</span>
+                                </label>
+                              </div>
+                          <style>
+                            [for="{{ product.id }}-{{ option.position }}-{{ forloop.index0 }}"]{
+                            background-color: {{value}};
+                            background-image: url({{ value | handle | append: '.png' | file_url }});
+                                background-size: cover;
+                            }
+                          </style>
+                              {%- endfor -%}
+                        </fieldset>
+                  {% else %}
+                        <div class="product-form__inputt product-form__input--dropdown">
+                          <label class="form__label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
+                            {{ option.name }} <span class="mrk_selected_opt"></span>
+                          </label>
+                          <div class="select">
+                            <select id="Option-{{ section.id }}-{{ forloop.index0 }}"
+                              class="select__select"
+                              name="options[{{ option.name | escape }}]"
+                              form="{{ product_form_id }}"
+                            >
+                              {%- for value in option.values -%}
+                                <option value="{{ value | escape }}" {% if option.selected_value == value %}selected="selected"{% endif %}>
+                                  {{ value }}
+                                </option>
+                              {%- endfor -%}
+                            </select>
+                            {% render 'icon-caret' %}
+                          </div>
+                        </div>
+                      {% endif %}
+                  	{%- endfor -%}
+                  <script type="application/json">
+                    {{ product.variants | json }}
+                  </script>
+                </variant-radios-mrk>
+      
+      
+      <div id="mainFrameOne">
+        <form method="post" action="/cart/add">
+          <input type="hidden" name="id" value="{{product.first_available_variant.id}}" class="mrk-id"/>
+          <input type="submit" name="add" value="Add to Cart" class="colbtn" />
+        </form>
+      </div>
+      </div>
+      </variant-selects-mrk>
+      {% endunless %}
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      class VariantSelectsmrk extends HTMLElement {
+  constructor() {
+    super();
+    this.addEventListener('change', this.onVariantChange);
+  }
+
+  onVariantChange() {
+    this.getSelectedOptions();
+    this.updateMasterIdmrk();
+  }
+  updateMasterIdmrk() {
+    console.log(this)
+    this.currentVariant = this.getVariantDatamrk().find((variant) => {
+      const finding = !variant.options.map(
+        (option, index) =>{
+          	console.log(this.options[index], option);
+			return this.options[index] === option;
+          	
+        }
+		).includes(false);
+      if(finding) return variant;
+    });
+    
+    this.updateData();
+    this.querySelector('.mrk-id').value = this.currentVariant.id;
+  }
+  updateData(){
+  	const variant = this.currentVariant;
+    if(variant.available){
+    	this.querySelector('[name="add"]').value = "Add to Cart";
+      	this.querySelector('[name="add"]').style.pointerEvents = 'all';
+        this.querySelector('[name="add"]').style.opacity = '1';
+    }
+    else{
+    	this.querySelector('[name="add"]').value = "Out of stock";
+      	this.querySelector('[name="add"]').style.pointerEvents = 'none';
+        this.querySelector('[name="add"]').style.opacity = '.5';
+    }
+    console.log(variant);
+  }
+  getSelectedOptions() {
+    var arr = [];
+    const select_btn = Array.from(this.querySelectorAll('select'), (select) => select.value);
+    console.log();
+    const fieldsets = Array.from(this.querySelectorAll('fieldset'));
+    this.options = fieldsets.map((fieldset) => {
+      const radio = Array.from(fieldset.querySelectorAll('input')).find((radio) => radio.checked).value;
+      arr.push(radio);
+    });
+    if(select_btn.length>0) arr = select_btn.concat(arr);
+    console.log(arr)
+    this.options = arr;
+    return this.options;
+}
+  getVariantDatamrk() {
+    this.variantData = this.variantData || JSON.parse(this.querySelector('[type="application/json"]').textContent);
+    return this.variantData;
+  }
+}
+customElements.define('variant-selects-mrk', VariantSelectsmrk);
+
+$(function(){
+	 $('.colbtn').click(function(e){
+       	e.preventDefault();
+        var mrk_form = $(this).closest('form').serialize();
+    	mrk_add_to_cart(mrk_form);
+    
+  });
+function mrk_add_to_cart(data) {
+    jQuery.ajax({
+        type: 'POST',
+        url: '/cart/add.js',
+        data: data,
+        dataType: 'json',
+        success: function() {
+		console.log('success');
+          
+        },
+        error: function (e) {
+        }
+    });
+}
+})
+
+
+
+
+
+
+
+.mrk-variants {width: 100%;}
+
+.mrk-variants fieldset {display: flex !important;border: none;padding: 10px 0;gap: 5px;flex-wrap: wrap;}
+
+.mrk-variants fieldset input {display: none;}
+
+.mrk-variants fieldset input:checked+label {border: 2px solid #F17D63}
+
+.mrk-variants fieldset label {height: 18px;width: 18px;display: flex;border-radius: 50%;justify-content: center;align-items: center;cursor: pointer;    border: 1px solid #8080805e;}
+variant-radios-mrk {display: flex; gap: 20px;    padding-bottom: 20px;}
+
+variant-radios-mrk > .product-form__inputt {flex: .5;}
+
+.mrk-variants fieldset {flex: 0.5;}
+
+.mrk-product-item .select__select {padding: 0 1rem;height: auto;border: 1px solid grey;}
+.mrk-product-item svg {right: 1rem !important;}
+span.tool-tip {opacity: 0;text-align: center;
+    background: gray;
+    color: #fff;
+    bottom: 100%;
+    padding: 10px;
+    display: block;
+    position: absolute;
+    width: 115px;visibility: hidden;
+    -webkit-transform: translateY(10px);
+    -moz-transform: translateY(10px);
+    -ms-transform: translateY(10px);
+    -o-transform: translateY(10px);
+    transform: translateY(10px);
+    -webkit-transition: all .25s ease-out;
+    -moz-transition: all .25s ease-out;
+    -ms-transition: all .25s ease-out;
+    -o-transition: all .25s ease-out;
+    transition: all .25s ease-out;
+    
+    
+    
+    
+    
+    z-index: 10000;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    left: -17px;}
+
+.mrk-variants fieldset label {position: relative;}
+
+.mrk-variants fieldset label:hover span {opacity: 1;
+    transform: translateY(-10px);
+    visibility: visible;}
+
+span.tool-tip:before {bottom: -20px;
+    content: " ";
+    display: block;
+    height: 20px;
+    left: 0;
+    position: absolute;
+    width: 100%;}
+
+span.tool-tip:after {border-left: solid transparent 10px;
+    border-right: solid transparent 10px;
+    border-top: solid gray 10px;
+    bottom: -9px;
+    content: " ";
+    height: 0;
+    left: 25px;
+    margin-left: -13px;
+    position: absolute;
+    width: 0;}
