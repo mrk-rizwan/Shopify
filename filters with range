@@ -1,0 +1,207 @@
+<form class="filter-form">
+  
+  {%- for filter in collection.filters -%}
+    <div class="filter-group">
+      <div class="filter-group-summary">
+        <div class="qmr-label">
+          <span>{{ filter.label }}</span>
+
+          {%- if filter.active_values.size > 0 -%}
+            <span>({{ filter.active_values.size }})</span>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="filter-group-display">
+        <div class="filter-group-display__header">
+          {%- if filter.active_values.size > 0 -%}
+            <a href="{{ filter.url_to_remove }}" class="filter-group-display__header-reset">Reset</a>
+          {%- endif -%}
+        </div>
+
+        {%- case filter.type -%}
+          {%- when 'boolean' or 'list' -%}
+            <ul class="filter-group-display__list">
+              {%- for filter_value in filter.values -%}
+                <li class="filter-group-display__list-item">
+                  <label for="Filter-{{ filter.param_name }}-{{ forloop.index }}-{{type | handle}}">
+                  <input type="checkbox"
+                    name="{{ filter_value.param_name }}"
+                    value="{{ filter_value.value }}"
+                    id="Filter-{{ filter.param_name }}-{{ forloop.index }}-{{type | handle}}"
+                    {% if filter_value.active -%}checked{%- endif %}
+                    {% if filter_value.count == 0 and filter_value.active == false -%}disabled{%- endif %}
+                  >{{ filter_value.label }}</label>
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- when 'price_range' -%}
+        {% render 'range', filter: filter, type:type%}
+           
+        {%- endcase -%}
+      </div>
+    </div>
+  {%- endfor -%}
+<div class="filter-group-display__submit">
+  				<button type="submit" class="Button Button--primary">Apply</button>
+  				 <a href="{{ collection.url }}?sort_by={{ collection.sort_by }}" class="active-filters__clear Button Button--secondary">Clear all</a>
+            </div>
+
+</form>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+range snippit
+
+
+
+<div class="min-max-slider" data-legendnum="2">
+    <input id="min" qmr_filter="min-{{type}}" class="min" name="{{ filter.min_value.param_name }}" type="range" step="500" min="0" 
+           max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+           
+                    value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+                  />
+    <input id="max" qmr_filter="max-{{type}}" class="max"  name="{{ filter.max_value.param_name }}" type="range" step="500" min="0" 
+           
+                    value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+                   min="0"
+                  max="{{ filter.range_max | money_without_currency | replace: ',', '' }}" />
+</div>
+<script>
+  $(function(){
+var thumbsize = 14;
+
+function draw(slider,splitvalue) {
+
+    /* set function vars */
+    var min = slider.querySelector('.min');
+    var max = slider.querySelector('.max');
+    var lower = slider.querySelector('.lower');
+    var upper = slider.querySelector('.upper');
+    var legend = slider.querySelector('.legend');
+    var thumbsize = parseInt(slider.getAttribute('data-thumbsize'));
+    var rangewidth = parseInt(slider.getAttribute('data-rangewidth'));
+    var rangemin = parseInt(slider.getAttribute('data-rangemin'));
+    var rangemax = parseInt(slider.getAttribute('data-rangemax'));
+
+    /* set min and max attributes */
+    min.setAttribute('max',splitvalue);
+    max.setAttribute('min',splitvalue);
+
+    /* set css */
+    min.style.width = parseInt(thumbsize + ((splitvalue - rangemin)/(rangemax - rangemin))*(rangewidth - (2*thumbsize)))+'px';
+    max.style.width = parseInt(thumbsize + ((rangemax - splitvalue)/(rangemax - rangemin))*(rangewidth - (2*thumbsize)))+'px';
+    min.style.left = '0px';
+    max.style.left = parseInt(min.style.width)+'px';
+    min.style.top = lower.offsetHeight+'px';
+    max.style.top = lower.offsetHeight+'px';
+    legend.style.marginTop = min.offsetHeight+'px';
+    slider.style.height = (lower.offsetHeight + min.offsetHeight + legend.offsetHeight)+'px';
+    
+    /* correct for 1 off at the end */
+    if(max.value>(rangemax - 1)) max.setAttribute('data-value',rangemax);
+
+    /* write value and labels */
+    max.value = max.getAttribute('data-value'); 
+    min.value = min.getAttribute('data-value');
+    lower.innerHTML = min.getAttribute('data-value');
+    upper.innerHTML = max.getAttribute('data-value');
+
+}
+
+function init(slider) {
+    /* set function vars */
+    var min = slider.querySelector('.min');
+    var max = slider.querySelector('.max');
+    var rangemin = parseInt(min.getAttribute('min'));
+    var rangemax = parseInt(max.getAttribute('max'));
+    var avgvalue = (rangemin + rangemax)/2;
+    var legendnum = slider.getAttribute('data-legendnum');
+
+    /* set data-values */
+    min.setAttribute('data-value',rangemin);
+    max.setAttribute('data-value',rangemax);
+    
+    /* set data vars */
+    slider.setAttribute('data-rangemin',rangemin); 
+    slider.setAttribute('data-rangemax',rangemax); 
+    slider.setAttribute('data-thumbsize',thumbsize); 
+    slider.setAttribute('data-rangewidth',slider.offsetWidth);
+
+    /* write labels */
+    var lower = document.createElement('span');
+    var upper = document.createElement('span');
+    lower.classList.add('lower','value');
+    upper.classList.add('upper','value');
+    lower.appendChild(document.createTextNode(rangemin));
+    upper.appendChild(document.createTextNode(rangemax));
+    slider.insertBefore(lower,min.previousElementSibling);
+    slider.insertBefore(upper,min.previousElementSibling);
+    
+    /* write legend */
+    var legend = document.createElement('div');
+    legend.classList.add('legend');
+    var legendvalues = [];
+    for (var i = 0; i < legendnum; i++) {
+        legendvalues[i] = document.createElement('div');
+        var val = Math.round(rangemin+(i/(legendnum-1))*(rangemax - rangemin));
+        legendvalues[i].appendChild(document.createTextNode(val));
+        legend.appendChild(legendvalues[i]);
+
+    } 
+    slider.appendChild(legend);
+
+    /* draw */
+    draw(slider,avgvalue);
+
+    /* events */
+    min.addEventListener("input", function() {update(min);});
+    max.addEventListener("input", function() {update(max);});
+    if(min.defaultValue != ''){
+      min.value = min.defaultValue;
+      min.dispatchEvent(new Event('input'));
+    }
+  if(max.defaultValue != ''){
+  	max.value = max.defaultValue;
+    max.dispatchEvent(new Event('input'));
+  }
+}
+
+function update(el){
+    /* set function vars */
+    var slider = el.parentElement;
+    var min = slider.querySelector('#min');
+    var max = slider.querySelector('#max');
+    var minvalue = Math.floor(min.value);
+    var maxvalue = Math.floor(max.value);
+    
+    /* set inactive values before draw */
+    min.setAttribute('data-value',minvalue);
+    max.setAttribute('data-value',maxvalue);
+
+    var avgvalue = (minvalue + maxvalue)/2;
+
+    /* draw */
+    draw(slider,avgvalue);
+}
+
+var sliders = document.querySelectorAll('.min-max-slider');
+sliders.forEach( function(slider) {
+    init(slider);
+});
+  })
+</script>
